@@ -1,62 +1,97 @@
-( defun C:RELOJ ()
+; Programa que dibuja un reloj
+; Elaborado por Diana Sandoval
 
-    (COMMAND "_ERASE" "_ALL" "") ;Borrar todo  
-    (COMMAND "_SNAP" "_OFF" "") ;Desactivar el autoajuste 
+(defun c:RELOJ()
 
-    (COMMAND "_CIRCLE" "120,120" "105" "") ;Dibujar circulo 
-    (COMMAND "_CIRCLE" "120,120" "100" "") ;Dibujar circulo 
+  (COMMAND "_ERASE" "_ALL" "") ;BORRAR TODO
+  (COMMAND "_OSNAP" "_OFF" "") ;DESACTIVAR AUTOSNAP
+  (COMMAND "_COLOR" 255 "") ;PONER COLOR BLANCO
 
-    ;Lineas Hora 
-    ; i<=360; i=i+30 Line 120,25 120,40 Rotate 120,120 i++, or 
+  ;CUERPO DEL RELOJ
+  (COMMAND "_CIRCLE" "60,160" 60 "")
+  (COMMAND "_CIRCLE" "60,160" 54 "")
+  (COMMAND "_LINE" "0,0" "15,21" "105,21" "120,0" "0,0" "")
+  (COMMAND "_LINE" "15,21" "15,120.3137" "")  
+  (COMMAND "_LINE" "105,21" "105,120.3137" "")
+  (COMMAND "_LINE" "105,199.6863" "105,240" "15,240" "15,199.6863" "")  
+  (COMMAND "_ARC" "30,91.3614" "60,85" "90,91.3614" "")
+  (COMMAND "_LINE" "30,91.3614" "30,36" "90,36" "90,91.3614" "")
+  (COMMAND "_CIRCLE" "60,48" 10 "")
+  (COMMAND "_LINE" "60,58" "60,85" "")
 
-    (COMMAND "_LINE" "120,25" "120,40" "")
-    (COMMAND "_ARRAY" (entlast) "_POLAR" "120,120" "_I" "12" "")
-    ;(COMMAND "_ROTATE" (entlast) "" "120,120" 0 ) 
-    ;(COMMAND "_LINE" "120,25" "120,40" "") 
-    ;(COMMAND "_ROTATE" (entlast) "" "120,120" 30 )  
-    (COMMAND "_LINE" "120,25" "120,40" "") 
-    (COMMAND "_ROTATE" (entlast) "" "120,120" 60 ) 
-    (COMMAND "_LINE" "120,25" "120,40" "" "_ROTATE" (entlast) "120,120" 90 ) 
-    (COMMAND "_LINE" "120,25" "120,40" "" "_ROTATE" (entlast) "120,120" 120 ) 
-    (COMMAND "_LINE" "120,25" "120,40" "" "_ROTATE" (entlast) "120,120" 150 ) 
-    (COMMAND "_LINE" "120,25" "120,40" "" "_ROTATE" (entlast) "120,120" 180 ) 
-    (COMMAND "_LINE" "120,25" "120,40" "" "_ROTATE" (entlast) "120,120" 210 ) 
-    (COMMAND "_LINE" "120,25" "120,40" "" "_ROTATE" (entlast) "120,120" 240 )  
-    (COMMAND "_LINE" "120,25" "120,40" "" "_ROTATE" (entlast) "120,120" 270 ) 
-    (COMMAND "_LINE" "120,25" "120,40" "" "_ROTATE" (entlast) "120,120" 300 ) 
-    (COMMAND "_LINE" "120,25" "120,40" "" "_ROTATE" (entlast) "120,120" 330 ) 
+  ;MANECILLAS
+    (COMMAND "_COLOR" 240 "")
+    (COMMAND "_LINE" "60,160" "60,201" "")
+    (SETQ segundero (ENTLAST));NOMBAR SEGUNDERO
+    (COMMAND "_COLOR" 255 "")
+    (COMMAND "_LINE" "60,160" "60,198" "")
+    (SETQ minutero (ENTLAST));NOMBRAR MINUTERO
+    (COMMAND "_LINE" "60,160" "60,192" "")
+    (SETQ horario (ENTLAST));NOMBRAR HORARIO
 
-    ;Lineas de minutos -48 
-    ; i<=360; i=i+6 Line 120,25 120,35 Rotate 120,120 i++, or 
+    ;LINEAS DE MINUTOS
+    (COMMAND "_LINE" "60,210" "60,204" "")
+    (COMMAND "_ARRAYPOLAR" (ENTLAST) "" "60,160" 12 360 "")
+    (COMMAND "_LINE" "60,210" "60,207" "")
+    (COMMAND "_ARRAYPOLAR" (ENTLAST) "" "60,160" 60 360 "")
 
-    (COMMAND "_CIRCLE" "120,120" "2" "" "_LINE" "122,120" "120,210" "118,120" "") ;Dibujar segundero 
-    (COMMAND "_GROUP" ent (entlast)) ;Agrupar 
-    (setq SEG ent (entlast)) ;Nombrar segundero 
-    (COMMAND "_COLOR"  "red" ent (entlast)) ;Darle color al segundero 
+    ;ZOOM EXTEND DEL DIBUJO
+    (COMMAND "_ZOOM" "_E" "")
 
-    (COMMAND "_CIRCLE" "120,120" "5" "" "_LINE" "125,120" "120,200" "115,120" "") ;Dibujar minutero 
-    (COMMAND "_GROUP" ent (entlast)) ;Agrupar 
-    (setq MIN ent (entlast)) ;Nombrar minutero 
+  (SETQ fecha_inicial (RTOS (GETVAR "CDATE") 2 6))
+   (princ fecha)
 
-    (COMMAND "_CIRCLE" "120,120" "5" "" "_LINE" "125,120" "120,180" "115,120" "") ;Dibujar horario 
-    (COMMAND "_GROUP" ent (entlast)) ;Agrupar 
-    (setq H ent (entlast)) ;Nombrar horario 
-    
-    
-    ;(;Obtener hora de sistema 
+  (SETQ a_i (SUBSTR fecha_inicial 1 4)
+    mes_i (SUBSTR fecha_inicial 5 2)
+    dia_i (SUBSTR fecha_inicial 7 2)
+    h_i (SUBSTR fecha_inicial 10 2)
+    m_i (SUBSTR fecha_inicial 12 2)
+    s_i (SUBSTR fecha_inicial 14 2)
+  )
 
-    ;Pasar hora sist a segundos 
+  (SETQ hseg (+ (atof s_i) (*  (atof m_i) 60) (* (REM  (atof h_i) 12) 3600) ))
 
-    ;Modulo hora/1440, nombrar s  
+    (SETQ anglem (+ 360 (* (REM hseg 3600) (/ 360.0 3600)) )
+	  angleh (+ 360 (* hseg (/ 360.0 43200)))
+	  angles (+ 360 (* (atof s) (/ 60 6)))
+	)
 
-    ;Rotar SEG (s*6) grados, con centro en 120,120 
+  (REPEAT 10
 
-    ;Modulo hora/24, nombrar m 
+    ;HORA
 
-    ;Rotar MIN (m*1) grados, con centro en 120,120 
+  (SETQ fecha (RTOS (GETVAR "CDATE") 2 6))
+   (princ fecha)
 
-    ;Modulo hora/12, nombrar h 
+  (SETQ a (SUBSTR fecha 1 4)
+    mes (SUBSTR fecha 5 2)
+    dia (SUBSTR fecha 7 2)
+    h (SUBSTR fecha 10 2)
+    m (SUBSTR fecha 12 2)
+    s (SUBSTR fecha 14 2)
+  )
+  
+  ;ANALOGO
 
-    ;Rotar H (h*(1/12)) grados, con centro en 120,120 
+     
+  (SETQ hseg (+ (+ (atof s) (* (atof s_i) -1)) (*  (+ (atof m) (* (atof m_i) -1)) 60) (* (REM  (+ (atof h) (* (atof h_i) -1)) 12) 3600) ))
 
-) ;Repetir cada segundo 62
+    (SETQ anglem (+ 360 (* (REM hseg 3600) (/ 360.0 3600)) )
+	  angleh (+ 360 (* hseg (/ 360.0 43200)))
+	  angles (+ 360 (* (+ (atof s) (* (atof s_i) -1)) (/ 60 6)))
+	)
+  
+  (COMMAND "_ROTATE" segundero "" "60,160" angles "" )
+  (COMMAND "_ROTATE" minutero "" "60,160" anglem "" )
+  (COMMAND "_ROTATE" horario "" "60,160" angleh "")
+  
+  ;DIGITAL
+    (COMMAND "_ERASE" textDate textHour "") ;BORRAR TEXTOS
+    (COMMAND "_TEXT" "_J" "_C" "60,20" 6 0 (strcat dia "/" mes "/" a ""))
+    (SETQ textDate (ENTLAST));PARA BORRARLA DESPUES 
+    (COMMAND "_TEXT" "_J" "_C" "60,225" 6 0 (strcat h":"m":"s ""))
+     (SETQ textHour (ENTLAST));PARA BORRARLA DESPUES 
+
+    (COMMAND "_DELAY" 1000 "")
+  )
+)
